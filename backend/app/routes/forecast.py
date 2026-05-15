@@ -4,34 +4,32 @@ from prophet import Prophet
 
 router = APIRouter()
 
-@router.post("/forecast")
+@router.get("/forecast")
+def energy_forecast():
 
-def forecast_sales():
-
-    # Read uploaded dataset
-    df = pd.read_csv("uploads/Sales.csv")
+    # Load dataset
+    df = pd.read_csv("uploads/Energy.csv")
 
     # Rename columns for Prophet
     df = df.rename(columns={
-        "Date": "ds",
-        "Sales": "y"
+        "timestamp": "ds",
+        "energy_usage": "y"
     })
+
+    # Convert timestamp
+    df["ds"] = pd.to_datetime(df["ds"])
 
     # Train model
     model = Prophet()
-
     model.fit(df)
 
-    # Predict next 30 days
-    future = model.make_future_dataframe(
-        periods=30
-    )
+    # Predict next 24 hours
+    future = model.make_future_dataframe(periods=24, freq='h')
 
     forecast = model.predict(future)
 
-    # Return predictions
-    result = forecast[["ds", "yhat"]]
+    # Get prediction output
+    result = forecast[["ds", "yhat"]].tail(24)
 
-    return result.tail(30).to_dict(
-        orient="records"
-    )
+    # Convert to JSON
+    return result.to_dict(orient="records")

@@ -1,46 +1,36 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
-from app.models.user import User
 
-from app.routes.auth import router as auth_router
-from app.routes.dataset import router as dataset_router
+# Import Routes
+from app.routes import forecast
+from app.routes import peak_usage
+from app.routes import anomalies
+from app.routes import recommendations
+from app.routes import simulation
 
-import pandas as pd
-import numpy as np
+app = FastAPI(
+    title="AI Energy Consumption Forecasting API"
+)
 
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
-
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-app.include_router(auth_router)
-app.include_router(dataset_router)
+# Include Routes
+app.include_router(forecast.router)
+app.include_router(peak_usage.router)
+app.include_router(anomalies.router)
+app.include_router(recommendations.router)
+app.include_router(simulation.router)
 
-@app.post("/forecast")
-def forecast_sales():
-
-    dates = pd.date_range(start="2025-01-01", periods=30)
-
-    forecast = []
-
-    for i in range(30):
-        forecast.append({
-            "date": str(dates[i].date()),
-            "forecast": float(np.random.randint(100, 500))
-        })
-
-    return {
-        "forecast": forecast
-    }
-
+# Home Route
 @app.get("/")
 def home():
-    return {"message": "Backend Working"}
+    return {
+        "message": "AI Energy Consumption Forecasting API Running"
+    }

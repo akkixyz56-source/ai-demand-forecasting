@@ -1,224 +1,187 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import jsPDF from "jspdf";
 
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
+  CartesianGrid,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from "recharts";
 
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-
 const Dashboard = () => {
-  const [file, setFile] = useState(null);
-  const [forecastData, setForecastData] = useState([]);
 
-  // Upload CSV
-  const handleUpload = async () => {
-    if (!file) {
-      alert("Please choose CSV file");
-      return;
-    }
+  const [forecast, setForecast] = useState([]);
+  const [peaks, setPeaks] = useState([]);
+  const [anomalies, setAnomalies] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
 
-    const formData = new FormData();
-    formData.append("file", file);
+  useEffect(() => {
+    fetchForecast();
+    fetchPeakUsage();
+    fetchAnomalies();
+    fetchRecommendations();
+  }, []);
 
+  const fetchForecast = async () => {
     try {
-      // Upload dataset
-      await axios.post(
-        "http://127.0.0.1:8000/upload",
-        formData
-      );
-
-      alert("CSV Uploaded Successfully");
-
-      // Get forecast results
-      const response = await axios.post(
-        "http://127.0.0.1:8000/forecast"
-      );
-
-      console.log(response.data);
-
-      setForecastData(response.data.forecast);
-
-    } catch (error) {
-      console.log(error);
-      alert("Upload Failed");
+      const res = await axios.get("http://127.0.0.1:8000/forecast");
+      setForecast(res.data);
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  // Analytics
-  const totalForecast = forecastData.reduce(
-    (sum, item) => sum + item.forecast,
-    0
-  );
-
-  const peakSales =
-    forecastData.length > 0
-      ? Math.max(
-          ...forecastData.map((item) => item.forecast)
-        )
-      : 0;
-
-  // Download Excel
-  const downloadCSV = () => {
-    let csv =
-      "Date,Forecast\n";
-
-    forecastData.forEach((item) => {
-      csv += `${item.date},${item.forecast}\n`;
-    });
-
-    const blob = new Blob([csv], {
-      type: "text/csv",
-    });
-
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "forecast_report.csv";
-    a.click();
+  const fetchPeakUsage = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/peak-usage");
+      setPeaks(res.data.peak_periods);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  // Download PDF
+  const fetchAnomalies = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/anomalies");
+      setAnomalies(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/recommendations");
+      setRecommendations(res.data.recommendations);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // PDF DOWNLOAD FUNCTION
   const downloadPDF = () => {
+
     const doc = new jsPDF();
 
     doc.text(
-      "AI Demand Forecast Report",
+      "AI Energy Consumption Forecast Report",
       20,
       20
     );
 
-    const tableColumn = [
-      "Date",
-      "Forecast",
-    ];
+    doc.text(
+      `Forecast Records: ${forecast.length}`,
+      20,
+      40
+    );
 
-    const tableRows = [];
+    doc.text(
+      `Peak Usage Records: ${peaks.length}`,
+      20,
+      50
+    );
 
-    forecastData.forEach((item) => {
-      tableRows.push([
-        item.date,
-        item.forecast,
-      ]);
-    });
+    doc.text(
+      `Anomalies Detected: ${anomalies.length}`,
+      20,
+      60
+    );
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 30,
-    });
+    doc.text(
+      `Recommendations: ${recommendations.length}`,
+      20,
+      70
+    );
 
-    doc.save("forecast_report.pdf");
+    doc.save("energy_report.pdf");
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-100 p-8">
 
-      {/* Title */}
-      <h1 className="text-5xl font-bold mb-8">
-        AI Demand Forecast Dashboard
+      <h1 className="text-4xl font-bold text-center mb-10 text-blue-700">
+        AI Energy Consumption Dashboard
       </h1>
 
-      {/* Upload */}
-      <div className="flex flex-col items-center mb-8">
+      {/* TOP CARDS */}
 
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) =>
-            setFile(e.target.files[0])
-          }
-          className="mb-4 text-white"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
 
-        <button
-          onClick={handleUpload}
-          className="bg-blue-500 px-6 py-3 rounded-lg font-bold hover:bg-blue-600"
-        >
-          Upload CSV
-        </button>
-
-      </div>
-
-      {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-        <div className="bg-blue-500 p-6 rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">
-            Total Forecast
-          </h2>
-
-          <p className="text-4xl">
-            {totalForecast.toFixed(2)}
-          </p>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-gray-500">Forecast Records</h3>
+          <h1 className="text-3xl font-bold">{forecast.length}</h1>
         </div>
 
-        <div className="bg-green-500 p-6 rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">
-            Peak Sales
-          </h2>
-
-          <p className="text-4xl">
-            {peakSales.toFixed(2)}
-          </p>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-gray-500">Peak Usage</h3>
+          <h1 className="text-3xl font-bold">{peaks.length}</h1>
         </div>
 
-        <div className="bg-purple-500 p-6 rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">
-            Growth Trend
-          </h2>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-gray-500">Anomalies</h3>
+          <h1 className="text-3xl font-bold">{anomalies.length}</h1>
+        </div>
 
-          <p className="text-3xl">
-            Positive 📈
-          </p>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-gray-500">Recommendations</h3>
+          <h1 className="text-3xl font-bold">{recommendations.length}</h1>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-gray-500">Forecast Accuracy</h3>
+          <h1 className="text-3xl font-bold">94%</h1>
         </div>
 
       </div>
 
-      {/* Download Buttons */}
-      <div className="flex gap-4 mb-8">
+      {/* FILTERS */}
 
-        <button
-          onClick={downloadCSV}
-          className="bg-green-600 px-5 py-2 rounded-lg"
-        >
-          Download Excel
-        </button>
+      <div className="flex justify-between mb-6">
 
-        <button
-          onClick={downloadPDF}
-          className="bg-red-600 px-5 py-2 rounded-lg"
-        >
-          Download PDF
-        </button>
+        <select className="p-2 rounded border">
+          <option>All Devices</option>
+          <option>AC_1</option>
+          <option>FAN_1</option>
+        </select>
+
+        <div className="space-x-3">
+
+          <button
+            onClick={downloadPDF}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Download PDF
+          </button>
+
+          <button className="bg-green-600 text-white px-4 py-2 rounded">
+            Download CSV
+          </button>
+
+        </div>
 
       </div>
 
-      {/* Graph */}
-      <div className="bg-white p-6 rounded-2xl mb-10">
+      {/* FORECAST CHART */}
 
-        <h2 className="text-4xl font-bold text-center mb-6 text-black">
-          Forecast Graph
+      <div className="bg-white p-5 rounded-xl shadow mb-8">
+
+        <h2 className="text-2xl font-semibold mb-5">
+          Forecast Predictions
         </h2>
 
-        <ResponsiveContainer
-          width="100%"
-          height={400}
-        >
+        <ResponsiveContainer width="100%" height={300}>
 
-          <LineChart data={forecastData}>
+          <LineChart data={forecast.slice(0, 10)}>
 
             <CartesianGrid strokeDasharray="3 3" />
 
-            <XAxis dataKey="date" />
+            <XAxis dataKey="ds" hide />
 
             <YAxis />
 
@@ -226,7 +189,7 @@ const Dashboard = () => {
 
             <Line
               type="monotone"
-              dataKey="forecast"
+              dataKey="yhat"
               stroke="#2563eb"
               strokeWidth={3}
             />
@@ -237,41 +200,88 @@ const Dashboard = () => {
 
       </div>
 
-      {/* Forecast Results */}
-      <div>
+      {/* PEAK USAGE */}
 
-        <h2 className="text-4xl font-bold mb-6">
-          Forecast Results
+      <div className="bg-white p-5 rounded-xl shadow mb-8">
+
+        <h2 className="text-2xl font-semibold mb-5">
+          Peak Usage Analysis
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ResponsiveContainer width="100%" height={300}>
 
-          {forecastData.map((item, index) => (
+          <BarChart data={peaks}>
+
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis dataKey="device_id" />
+
+            <YAxis />
+
+            <Tooltip />
+
+            <Bar
+              dataKey="energy_usage"
+              fill="#ef4444"
+            />
+
+          </BarChart>
+
+        </ResponsiveContainer>
+
+      </div>
+
+      {/* ANOMALIES */}
+
+      <div className="bg-white p-5 rounded-xl shadow mb-8">
+
+        <h2 className="text-2xl font-semibold mb-5">
+          Detected Anomalies
+        </h2>
+
+        {
+          anomalies.map((item, index) => (
 
             <div
               key={index}
-              className="bg-gray-800 p-4 rounded-lg shadow"
+              className="border-b py-3"
             >
 
-              <p className="mb-2">
-                <span className="font-bold">
-                  Date:
-                </span>{" "}
-                {item.date}
+              <p>
+                <strong>Device:</strong> {item.device_id}
               </p>
 
               <p>
-                <span className="font-bold">
-                  Predicted Sales:
-                </span>{" "}
-                {item.forecast}
+                <strong>Abnormal Usage:</strong> {item.energy_usage}
               </p>
 
             </div>
 
-          ))}
+          ))
+        }
 
-        </div>
+      </div>
+
+      {/* RECOMMENDATIONS */}
+
+      <div className="bg-white p-5 rounded-xl shadow">
+
+        <h2 className="text-2xl font-semibold mb-5">
+          AI Recommendations
+        </h2>
+
+        {
+          recommendations.map((item, index) => (
+
+            <div
+              key={index}
+              className="border-b py-3"
+            >
+              {item}
+            </div>
+
+          ))
+        }
 
       </div>
 
