@@ -1,62 +1,180 @@
-# AI Demand Forecasting Dashboard
+# AI-Based Energy Consumption Forecasting & Optimization System
 
-An AI-powered demand forecasting application built using FastAPI and React.js.  
-The system allows users to upload CSV datasets, generate future demand forecasts, visualize analytics, and download reports in PDF and Excel formats.
+## Overview
+AI-Based Energy Consumption Forecasting & Optimization System is a full-stack machine learning application designed to predict future energy usage patterns, detect anomalies, and generate optimization recommendations for reducing energy waste and improving operational efficiency.
 
-## Features
+The system uses forecasting models, anomaly detection techniques, and analytics dashboards to provide intelligent insights for energy management.
 
-- User Authentication
-- CSV Dataset Upload
-- AI-Based Demand Forecasting
-- Forecast Analytics Dashboard
-- Interactive Forecast Graphs
-- Forecast Results Display
-- PDF Report Download
-- Excel Report Download
+---
 
-## Tech Stack
+# Features
 
-### Backend
-- FastAPI
-- MySQL
-- SQLAlchemy
-- Pandas
-- Scikit-learn
+## Energy Consumption Forecasting
+- Daily energy usage prediction
+- Hourly consumption forecasting
+- Building/device-wise forecasting
+- Next 24 hours prediction
+- Next 7 days prediction
+- Next 30 days prediction
 
-### Frontend
+## Peak Usage Prediction
+- Detect peak energy usage periods
+- High-load hour prediction
+- Energy spike alerts
+- Smart energy threshold monitoring
+
+## AI-Based Optimization Recommendations
+- Suggested load balancing
+- Energy-saving schedules
+- Off-peak operational recommendations
+- Device shutdown recommendations
+
+## Consumption Anomaly Detection
+- Sudden energy spike detection
+- Unexpected usage monitoring
+- Sensor anomaly detection
+- Faulty device behavior analysis
+
+## Scenario Simulation System
+- Simulate increased occupancy
+- Temperature variation impact
+- Device shutdown simulation
+- Peak-hour load reduction analysis
+
+## Advanced Analytics Dashboard
+- Historical vs predicted energy visualization
+- Peak usage analytics
+- Device-wise analytics
+- Forecast accuracy metrics
+- Interactive charts and graphs
+
+## Export Reports
+- Download analytics reports in CSV format
+- PDF report generation support
+
+---
+
+# Tech Stack
+
+## Frontend
 - React.js
 - Tailwind CSS
-- Axios
 - Recharts
 
-## Project Modules
+## Backend
+- Python
+- FastAPI
 
-- Authentication Module
-- Dataset Upload Module
-- AI Forecasting Module
-- Dashboard & Analytics
-- Reports & Export Functionality
+## Database
+- SQLite / PostgreSQL
 
-## How to Run
+## Machine Learning Libraries
+- Scikit-learn
+- Prophet
+- Pandas
+- NumPy
 
-### Backend
+---
+
+# Machine Learning Models Used
+- Prophet Forecasting Model
+- Regression-Based Forecasting
+- Isolation Forest
+- Statistical Thresholding
+- Z-Score Anomaly Detection
+
+---
+
+# System Architecture
+
+The project is divided into multiple modules:
+- Forecasting Module
+- Optimization Recommendation Engine
+- Anomaly Detection Module
+- Simulation Engine
+- Analytics Dashboard
+- API Services
+
+---
+
+# API Endpoints
+
+## Forecast APIs
+- Generate energy consumption forecasts
+- Predict future energy usage
+
+## Analytics APIs
+- Historical data analytics
+- Device-wise analytics
+
+## Recommendation APIs
+- Generate optimization recommendations
+- Peak load analysis
+
+## Simulation APIs
+- Scenario simulation execution
+- Impact estimation
+
+---
+
+# Dataset Information
+
+Dataset fields include:
+- Timestamp
+- Device/Building ID
+- Energy Usage
+- Temperature Data
+- Weather Conditions
+
+---
+
+# Installation
+
+## Clone Repository
 
 ```bash
+git clone https://github.com/yourusername/ai-energy-forecasting-system.git
+```
+
+## Backend Setup
+
+```bash
+cd backend
+pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-### Frontend
+## Frontend Setup
 
 ```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-## Expected Output
+---
 
-- Upload historical sales dataset
-- Generate AI-based forecasts
-- Visualize forecast analytics
-- Download reports in PDF/Excel format
+# Future Improvements
+- Real-time monitoring dashboard
+- Automated retraining pipeline
+- Docker deployment
+- Alert notification system
+- Model comparison dashboard
+
+---
+
+# Evaluation Highlights
+- Forecasting accuracy improvement
+- Modular ML architecture
+- FastAPI backend integration
+- Interactive analytics dashboard
+- Edge case handling
+- Scalable and maintainable design
+
+---
+
+# Author
+Developed as part of AI/ML Full Stack Project Assignment.
 
 
 -------
